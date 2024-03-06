@@ -28,6 +28,7 @@ services:
 
   redis:  
     image: redis
+    container_name: redis
 
   user:
     image: user:1
@@ -43,4 +44,4 @@ services:
 
   mysql:
     image: mysql:1
-    
+

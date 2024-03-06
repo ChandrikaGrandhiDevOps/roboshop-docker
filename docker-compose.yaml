@@ -2,11 +2,20 @@ networks:
   default:
     external:
       name: roboshop
+volumes:
+  mongodb: #docker volume create mongodb
+  redis:
+  mysql:
+  rabbitmq:
 services:
   # docker run -d --name mongodb --network=roboshop mongodb:1
   mongodb:
     image: mongodb:1
     container_name: mongodb
+    volumes:
+    - source: mongodb
+      target: /data/db
+      type: volume
     # networks:
     # - roboshop
 
@@ -25,10 +34,18 @@ services:
     - "80:80"
     depends_on:
     - catalogue
+    - cart
+    - user
+    - shipping
+    - payment
 
-  redis:  
+  redis:
     image: redis
     container_name: redis
+    volumes:
+    - source: redis
+      target: /data
+      type: volume
 
   user:
     image: user:1
@@ -47,4 +64,32 @@ services:
   mysql:
     image: mysql:1
     container_name: mysql
+    volumes:
+    - source: mysql
+      target: /var/lib/mysql
+      type: volume
 
+  shipping:
+    image: shipping:1
+    container_name: shipping
+    depends_on:
+    - mysql
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq
+    environment:
+    - RABBITMQ_DEFAULT_USER=roboshop
+    - RABBITMQ_DEFAULT_PASS=roboshop123
+    volumes:
+    - source: rabbitmq
+      target: /var/lib/rabbitmq
+      type: volume
+
+  payment:
+    container_name: payment
+    image: payment:1
+    depends_on:
+    - rabbitmq
+    - user
+    - cart
